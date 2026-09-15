@@ -1,4 +1,5 @@
 import os
+
 from config import MAX_CHARS
 
 schema_get_file_content = {
@@ -13,24 +14,27 @@ schema_get_file_content = {
                     "type": "string",
                     "description": "Directory path to list files from, relative to the working directory (default is the working directory itself)",
                 },
-                "file_path":{
+                "file_path": {
                     "type": "string",
-                    "description": "getting file path to search program"
-                }
+                    "description": "getting file path to search program",
+                },
             },
-            "required": ["file_path"]
+            "required": ["file_path"],
         },
     },
 }
+
 
 def get_file_content(working_directory: str, file_path: str) -> str:
 
     try:
         working_dir_abs = os.path.abspath(working_directory)
-        #print(working_dir_abs)
+        # print(working_dir_abs)
         target_file = os.path.normpath(os.path.join(working_dir_abs, file_path))
 
-        valid_target_fp = os.path.commonpath([working_dir_abs, target_file]) != working_dir_abs
+        valid_target_fp = (
+            os.path.commonpath([working_dir_abs, target_file]) != working_dir_abs
+        )
         if valid_target_fp:
             return f'Cannot read "{file_path}" as it is outside the permitted working directory'
         if not os.path.isfile(target_file):
@@ -39,7 +43,9 @@ def get_file_content(working_directory: str, file_path: str) -> str:
         with open(target_file, "r") as f:
             file_content_string = f.read(MAX_CHARS)
             if f.read(1):
-                file_content_string += f'[...File "{file_path}" truncated at {MAX_CHARS} characters]'
+                file_content_string += (
+                    f'[...File "{file_path}" truncated at {MAX_CHARS} characters]'
+                )
         return file_content_string
     except Exception as e:
         return f"Error: {e}"

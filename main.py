@@ -5,7 +5,7 @@ import json
 from dotenv import load_dotenv
 from openai import OpenAI
 from prompts import system_prompt
-from call_functions import available_functions
+from call_functions import available_functions, call_function
 
 def main():
     parser = argparse.ArgumentParser(description="Chatbot")
@@ -43,13 +43,12 @@ def main():
         print(f"Prompt tokens: {response.usage.prompt_tokens}")
         print(f"Response tokens: {response.usage.completion_tokens}")
 
-
     print("Response:")
     message = response.choices[0].message
     if message.tool_calls:
         for tool_call in message.tool_calls:
-            function_args = json.loads(tool_call.function.arguments or "{}")
-            print(f"Calling function: {tool_call.function.name}({function_args})")
+            result_message = call_function(tool_call, args.verbose)
+            print(f"-> {result_message['content']}")
     else:
         print(message.content)
 

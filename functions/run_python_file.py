@@ -13,9 +13,9 @@ schema_run_python_file = {
                     "type": "string",
                     "description": "Directory path to list files from, relative to the working directory (default is the working directory itself)",
                 },
-                "file_path":{
+                "file_path": {
                     "type": "string",
-                    "description": "getting file path to search program"
+                    "description": "getting file path to search program",
                 },
                 "args": {
                     "type": "array",
@@ -23,18 +23,23 @@ schema_run_python_file = {
                     "description": "optional arguments to pass to the python script",
                 },
             },
-            "required": ["file_path"]
+            "required": ["file_path"],
         },
     },
 }
 
-def run_python_file(working_directory: str, file_path: str, args: list[str] | None = None) -> str:
+
+def run_python_file(
+    working_directory: str, file_path: str, args: list[str] | None = None
+) -> str:
     try:
         working_dir_abs = os.path.abspath(working_directory)
         target_file = os.path.normpath(os.path.join(working_dir_abs, file_path))
-        #print(target_file)
+        # print(target_file)
 
-        is_outside = os.path.commonpath([working_dir_abs, target_file]) != working_dir_abs
+        is_outside = (
+            os.path.commonpath([working_dir_abs, target_file]) != working_dir_abs
+        )
         if is_outside:
             return f'Error: Cannot execute "{file_path}" as it is outside the permitted working directory'
         if not os.path.isfile(target_file):
@@ -48,10 +53,7 @@ def run_python_file(working_directory: str, file_path: str, args: list[str] | No
             command.extend(args)
 
         result = subprocess.run(
-            args = command,
-            capture_output= True,
-            text=True,
-            timeout = 3000
+            args=command, capture_output=True, text=True, timeout=3000
         )
 
         output_parts = []
@@ -67,7 +69,6 @@ def run_python_file(working_directory: str, file_path: str, args: list[str] | No
             if result.stderr:
                 output_parts.append(f"STDERR:\n{result.stderr}")
         return "\n".join(output_parts)
-
 
     except Exception as e:
         return f"Error: executing Python file: {e}"
