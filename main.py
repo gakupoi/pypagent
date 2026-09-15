@@ -30,7 +30,7 @@ def main():
         {"role": "user", "content": args.user_prompt},
     ]
 
-    for _ in range(2):
+    for _ in range(20):
         response = client.chat.completions.create(
             model="openrouter/free",
             messages=messages,
@@ -47,12 +47,14 @@ def main():
 
         message = response.choices[0].message
         messages.append(message)
-        if message.tool_calls:
-            for tool_call in message.tool_calls:
-                result_message = call_function(tool_call, args.verbose)
-                #print(f"-> {result_message['content']}")
-                messages.append(result_message)
-        print(_)
+        if not message.tool_calls:
+            break
+        for tool_call in message.tool_calls:
+            result_message = call_function(tool_call, args.verbose)
+            #print(f"-> {result_message['content']}")
+            messages.append(result_message)
+        print("Maximum iterations reached without final response")
+        exit(1)
 
     print("Final response:")
     print(messages[-1].content)
