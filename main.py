@@ -1,6 +1,6 @@
 import argparse
-import json
 import os
+import sys
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -18,7 +18,7 @@ def main():
     load_dotenv()
     api_key = os.environ.get("OPENROUTER_API_KEY")
     if not api_key:
-        raise RuntimeError(f"api_key is not founded")
+        raise RuntimeError("api_key is not founded")
 
     client = OpenAI(
         base_url="https://openrouter.ai/api/v1",
@@ -47,17 +47,18 @@ def main():
 
         message = response.choices[0].message
         messages.append(message)
+
         if not message.tool_calls:
-            break
+            print("Final response:")
+            print(message.content)
+            return
         for tool_call in message.tool_calls:
             result_message = call_function(tool_call, args.verbose)
-            #print(f"-> {result_message['content']}")
             messages.append(result_message)
+    else:
         print("Maximum iterations reached without final response")
-        exit(1)
+        sys.exit(1)
 
-    print("Final response:")
-    print(messages[-1].content)
 
 if __name__ == "__main__":
     main()
